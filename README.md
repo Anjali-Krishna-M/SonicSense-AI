@@ -96,5 +96,4 @@ python app.py
 
 This project is for educational purposes (MCA Final Year Project).
 
-```
 
