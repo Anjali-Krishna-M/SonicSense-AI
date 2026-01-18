@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SonicSense | Recommendations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Sonic<span class="highlight">Sense</span></div>
+        <div class="nav-links">
+            <a href="/dashboard">< Back to Analysis</a>
+            <a href="/">Upload New</a>
+        </div>
+    </nav>
+
+    <div class="centered">
+        <div class="card">
+            <h2><i class="fas fa-music"></i> Similar Tracks</h2>
+            <p style="text-align:center; color: #ccc; margin-bottom: 30px;">
+                Based on the Audio DNA of <strong>{{ data.original_name }}</strong> ({{ data.genre }}):
+            </p>
+
+            <div class="rec-list">
+                {% for song in data.recommendations %}
+                <div class="rec-item">
+                    <div class="rec-info">
+                        <div class="index-bubble">{{ loop.index }}</div>
+                        <div>
+                            <h4 style="margin: 0;">{{ song.title }}</h4>
+                            <p style="margin: 0; font-size: 0.8rem; color: #aaa;">{{ song.artist }}</p>
+                        </div>
+                    </div>
+                    <a href="https://www.youtube.com/results?search_query={{ song.title }}+{{ song.artist }}" target="_blank" class="btn-analyze btn-small">
+                        <i class="fab fa-youtube"></i> Play
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

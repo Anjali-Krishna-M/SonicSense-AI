@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SonicSense | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Sonic<span class="highlight">Sense</span></div>
+        <div class="nav-links">
+            <a href="/">Upload New</a>
+            <a href="/history">History</a>
+            <a href="/recommendations" class="active">Similar Songs <i class="fas fa-chevron-right"></i></a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="card">
+            <h2><i class="fas fa-poll"></i> Analysis Report</h2>
+            <p style="text-align:center; color:#ccc; margin-bottom: 20px;">Track: <strong class="highlight">{{ data.original_name }}</strong></p>
+            
+            <div class="result-grid">
+                <div class="result-item">
+                    <p class="label">GENRE</p>
+                    <div class="val">{{ data.genre }}</div>
+                </div>
+                <div class="result-item">
+                    <p class="label">CONFIDENCE</p>
+                    <div class="val">{{ data.confidence }}%</div>
+                </div>
+            </div>
+            
+            <div class="mood-box">
+                <h3>Detected Mood: <span class="highlight">{{ data.mood }}</span></h3>
+                <p style="color: #ddd; margin-top: 10px; line-height: 1.6;">{{ data.desc }}</p>
+            </div>
+
+            <div class="player-box">
+                <p style="color: #ccc; margin-bottom: 10px;"><i class="fas fa-headphones"></i> Play Uploaded Track</p>
+                <audio controls>
+                    <source src="{{ url_for('play_uploaded', filename=data.uploaded_file) }}" type="audio/wav">
+                </audio>
+            </div>
+        </div>
+
+        <div class="card" style="min-height: 600px; display: flex; flex-direction: column;">
+            <h2><i class="fas fa-dna"></i> Audio DNA Spectrum</h2>
+            <div style="flex-grow: 1; position: relative; min-height: 500px;">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 40px;">
+        <a href="/recommendations" class="btn-analyze btn-small">
+            See Songs Similar to {{ data.original_name }} <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            const chartData = JSON.parse('{{ data.chart_data | tojson | safe }}');
+            
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Energy (RMS)', 'Brightness', 'Timbre Texture', 'Roughness (ZCR)', 'Tempo (BPM)'],
+                    datasets: [{
+                        label: 'Spectral Analysis',
+                        data: chartData,
+                        backgroundColor: 'rgba(0, 210, 255, 0.3)',
+                        borderColor: '#00d2ff',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#00d2ff',
+                        pointRadius: 5,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false, // CRITICAL for filling the bigger container
+                    scales: {
+                        r: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)', circular: true },
+                            angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                            pointLabels: { color: '#e0e0e0', font: { size: 14, weight: 'bold', family: 'Poppins' } },
+                            ticks: { display: false, backdropColor: 'transparent' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

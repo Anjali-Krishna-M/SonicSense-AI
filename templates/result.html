@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analysis Result | VibeCheck</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand"><i class="fas fa-wave-square"></i> VibeCheck AI</div>
+        <div style="color: #666; font-size: 0.9rem;">Analysis Complete</div>
+    </nav>
+
+    <div class="result-container">
+        
+        <div class="disk-wrapper">
+            <div class="disk-art"><div class="disk-center"></div></div>
+        </div>
+
+        <h1 class="genre-title">{{ genre }}</h1>
+        <h3 class="mood-subtitle"><i class="fas fa-music"></i> Detected Vibe: {{ mood }}</h3>
+
+        <div style="background: #1a1a1a; padding: 20px; border-radius: 15px; margin-bottom: 30px; border: 1px solid #333; text-align: left;">
+            <p style="color: #888; font-size: 0.9rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">AI Model Confidence</p>
+            {% for g, score in top_3 %}
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center;">
+                <span style="font-weight: 600; color: white;">{{ g }}</span>
+                <div style="flex: 1; margin: 0 15px; background: #333; height: 8px; border-radius: 4px;">
+                    <div style="width: {{ score }}%; background: var(--primary); height: 100%; border-radius: 4px;"></div>
+                </div>
+                <span style="color: var(--primary);">{{ score }}%</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-value">{{ tempo }}</span>
+                <span class="stat-label">BPM (Tempo)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ confidence }}%</span>
+                <span class="stat-label">Top Match</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">High</span>
+                <span class="stat-label">Energy Level</span>
+            </div>
+        </div>
+
+        <div style="background: #1a1a1a; padding: 20px; border-radius: 20px; border: 1px solid #333;">
+            <p style="margin: 0 0 10px 0; color: #888; font-size: 0.9rem;">Original Track: {{ filename }}</p>
+            <audio controls>
+                <source src="{{ url_for('static', filename='uploads/' + filename) }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+
+        <a href="/" class="btn-back">Analyze Another Song</a>
+
+    </div>
+
+</body>
+</html>

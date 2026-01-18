@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SonicSense | History</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Sonic<span class="highlight">Sense</span></div>
+        <div class="nav-links">
+            <a href="/">Upload</a>
+            <a href="/history" class="active">History</a>
+            <a href="/analytics">Analytics</a>
+        </div>
+    </nav>
+
+    <div class="centered">
+        <div class="card" style="max-width: 800px;">
+            <h2><i class="fas fa-history"></i> Session History</h2>
+            
+            {% if history %}
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Track Name</th>
+                        <th>Genre</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ item.name }}</td>
+                        <td><span class="genre-tag">{{ item.genre }}</span></td>
+                        <td style="font-size: 0.9rem; color: #aaa;">{{ item.date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="text-align: center; color: #aaa; margin: 40px 0;">No songs analyzed yet in this session.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

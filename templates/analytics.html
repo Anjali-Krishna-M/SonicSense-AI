@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SonicSense | Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Sonic<span class="highlight">Sense</span></div>
+        <div class="nav-links">
+            <a href="/">Upload</a>
+            <a href="/history">History</a>
+            <a href="/analytics" class="active">Analytics</a>
+        </div>
+    </nav>
+
+    <div class="centered">
+        <div class="card">
+            <h2><i class="fas fa-chart-pie"></i> Dataset Distribution</h2>
+            <p style="text-align: center; color: #aaa; margin-bottom: 20px;">Training data balance (GTZAN)</p>
+            
+            <div style="height: 400px; position: relative;">
+                <canvas id="datasetChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('datasetChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Blues', 'Classical', 'Country', 'Disco', 'Hiphop', 'Jazz', 'Metal', 'Pop', 'Reggae', 'Rock'],
+                datasets: [{
+                    data: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED', '#76D7C4', '#F1948A', '#85C1E9'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: '#ccc', padding: 20, font: { family: 'Poppins' } } } }
+            }
+        });
+    </script>
+</body>
+</html>

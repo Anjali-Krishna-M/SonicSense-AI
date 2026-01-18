@@ -1,0 +1,19 @@
+# Ignore the Virtual Environment (It's huge and local only)
+venv/
+env/
+
+# Ignore the Dataset (Too big for GitHub)
+dataset/
+genres_original/
+
+# Ignore Python Cache files
+__pycache__/
+*.pyc
+
+# Ignore User Uploads
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Ignore System files
+.DS_Store
+Thumbs.db
