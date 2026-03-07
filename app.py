@@ -1,10 +1,15 @@
-from flask import Flask, render_template, request, session, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, session, redirect, url_for, send_from_directory, flash
 import librosa
 import numpy as np
 import joblib
 import os
 import uuid
+import sqlite3
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+import mimetypes
+mimetypes.add_type('text/css', '.css')
+
 
 app = Flask(__name__)
 app.secret_key = "super_secret_mca_key_viva_2026"
@@ -12,6 +17,24 @@ app.secret_key = "super_secret_mca_key_viva_2026"
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# --- INITIALIZE DATABASE ---
+def init_db():
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    # Create a table for users if it doesn't exist
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# Run database init on startup
+init_db()
 
 print("⏳ Loading AI Models...")
 try:
@@ -62,27 +85,89 @@ def extract_features(file_path):
     chart_data = [float(rms)*100, float(spec_cent)/50, float(rolloff)/100, float(zcr)*500, 120]
     return np.array(features).reshape(1, -1), chart_data
 
+# --- AUTHENTICATION ROUTES ---
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        hashed_pw = generate_password_hash(password) # Encrypt password
+        
+        try:
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_pw))
+            conn.commit()
+            conn.close()
+            flash('Registration successful! Please login.', 'success')
+            return redirect(url_for('login'))
+        except sqlite3.IntegrityError:
+            flash('Username already exists. Please choose another.', 'error')
+            
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM users WHERE username=?", (username,))
+        user = c.fetchone()
+        conn.close()
+        
+        if user and check_password_hash(user[2], password):
+            session['user'] = username # Create session
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid username or password', 'error')
+            
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None) # Clear session
+    session.pop('history', None)
+    session.pop('result', None)
+    return redirect(url_for('login'))
+
+# --- CORE ROUTES ---
 @app.route('/')
-def index(): return render_template('index.html')
+def index(): 
+    if 'user' not in session: return redirect(url_for('login'))
+    return render_template('index.html')
+
 @app.route('/about')
-def about(): return render_template('about.html')
+def about(): 
+    return render_template('about.html')
+
 @app.route('/analytics')
-def analytics(): return render_template('analytics.html')
+def analytics(): 
+    if 'user' not in session: return redirect(url_for('login'))
+    return render_template('analytics.html')
+
 @app.route('/history')
-def history(): return render_template('history.html', history=session.get('history', []))
+def history(): 
+    if 'user' not in session: return redirect(url_for('login'))
+    return render_template('history.html', history=session.get('history', []))
 
 @app.route('/dashboard')
 def dashboard():
+    if 'user' not in session: return redirect(url_for('login'))
     if 'result' not in session: return redirect(url_for('index'))
     return render_template('dashboard.html', data=session['result'])
 
 @app.route('/recommendations')
 def recommendations():
+    if 'user' not in session: return redirect(url_for('login'))
     if 'result' not in session: return redirect(url_for('index'))
     return render_template('recommendations.html', data=session['result'])
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
+    if 'user' not in session: return redirect(url_for('login'))
     if 'file' not in request.files: return redirect(url_for('index'))
     file = request.files['file']
     if file.filename == '': return redirect(url_for('index'))

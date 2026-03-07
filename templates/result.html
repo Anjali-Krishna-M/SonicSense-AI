@@ -2,66 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Analysis Result | VibeCheck</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Analysis Result | SonicSense AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sonic.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="navbar-brand"><i class="fas fa-wave-square"></i> VibeCheck AI</div>
-        <div style="color: #666; font-size: 0.9rem;">Analysis Complete</div>
+        <div class="logo">Sonic<span class="highlight">Sense</span></div>
+        <div class="nav-links">
+            <a href="/">Analyze Another</a>
+            <a href="/logout" style="color: #ff4b2b; font-weight: bold;">
+                <i class="fas fa-sign-out-alt"></i> Logout ({{ session.get('user', 'User') }})
+            </a>
+        </div>
     </nav>
 
-    <div class="result-container">
-        
-        <div class="disk-wrapper">
-            <div class="disk-art"><div class="disk-center"></div></div>
-        </div>
+    <div class="centered">
+        <div class="card" style="max-width: 600px;">
+            
+            <h1 class="highlight" style="font-size: 2.5rem; text-transform: uppercase;">{{ genre | default('Unknown') }}</h1>
+            <h3 style="margin-bottom: 20px; font-weight: 400;"><i class="fas fa-music"></i> Detected Vibe: <span class="highlight">{{ mood | default('Analyzing...') }}</span></h3>
 
-        <h1 class="genre-title">{{ genre }}</h1>
-        <h3 class="mood-subtitle"><i class="fas fa-music"></i> Detected Vibe: {{ mood }}</h3>
+            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05); text-align: left;">
+                <p style="color: #aaa; font-size: 0.8rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">AI Model Confidence</p>
+                
+                {% if top_3 %}
+                    {% for g, score in top_3 %}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+                        <span style="font-weight: 500; color: white; width: 80px; text-transform: capitalize;">{{ g }}</span>
+                        
+                        <div style="flex: 1; margin: 0 15px; background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div class="confidence-bar" data-score="{{ score | default(0) }}" style="background: #00d2ff; height: 100%; border-radius: 4px; box-shadow: 0 0 10px rgba(0,210,255,0.5); width: 0%;"></div>
+                        </div>
+                        
+                        <span style="color: #00d2ff; width: 50px; text-align: right; font-weight: 600;">{{ score | default(0) }}%</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #777; font-size: 0.9rem; font-style: italic;">Confidence metrics loading...</p>
+                {% endif %}
+            </div>
 
-        <div style="background: #1a1a1a; padding: 20px; border-radius: 15px; margin-bottom: 30px; border: 1px solid #333; text-align: left;">
-            <p style="color: #888; font-size: 0.9rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">AI Model Confidence</p>
-            {% for g, score in top_3 %}
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center;">
-                <span style="font-weight: 600; color: white;">{{ g }}</span>
-                <div style="flex: 1; margin: 0 15px; background: #333; height: 8px; border-radius: 4px;">
-                    <div style="width: {{ score }}%; background: var(--primary); height: 100%; border-radius: 4px;"></div>
+            <div class="result-grid">
+                <div class="result-item">
+                    <p class="label">BPM (Tempo)</p>
+                    <div class="val" style="font-size: 1.8rem;">{{ tempo | default('120') }}</div>
                 </div>
-                <span style="color: var(--primary);">{{ score }}%</span>
+                <div class="result-item">
+                    <p class="label">TOP MATCH</p>
+                    <div class="val" style="font-size: 1.8rem;">{{ confidence | default('100') }}%</div>
+                </div>
+                <div class="result-item">
+                    <p class="label">ENERGY</p>
+                    <div class="val" style="font-size: 1.8rem;">High</div>
+                </div>
             </div>
-            {% endfor %}
+
+            <div class="player-box">
+                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;">Original Track: {{ filename | default('audio.wav') }}</p>
+                <audio controls style="width: 100%;">
+                    {% if filename %}
+                        <source src="{{ url_for('static', filename='uploads/' + filename) }}" type="audio/mpeg">
+                    {% endif %}
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <a href="/" class="btn-analyze" style="margin-top: 30px;">Analyze Another Song</a>
+
         </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-value">{{ tempo }}</span>
-                <span class="stat-label">BPM (Tempo)</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value">{{ confidence }}%</span>
-                <span class="stat-label">Top Match</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value">High</span>
-                <span class="stat-label">Energy Level</span>
-            </div>
-        </div>
-
-        <div style="background: #1a1a1a; padding: 20px; border-radius: 20px; border: 1px solid #333;">
-            <p style="margin: 0 0 10px 0; color: #888; font-size: 0.9rem;">Original Track: {{ filename }}</p>
-            <audio controls>
-                <source src="{{ url_for('static', filename='uploads/' + filename) }}" type="audio/mpeg">
-                Your browser does not support the audio element.
-            </audio>
-        </div>
-
-        <a href="/" class="btn-back">Analyze Another Song</a>
-
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.confidence-bar').forEach(function(bar) {
+                var score = bar.getAttribute('data-score');
+                bar.style.width = score + '%';
+            });
+        });
+    </script>
 
 </body>
 </html>
